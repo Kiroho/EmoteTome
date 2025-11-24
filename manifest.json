@@ -1,6 +1,6 @@
 {
     "name": "EmoteTome",
-    "version": "1.3.4",
+    "version": "1.3.5",
     "namespace": "Kiroho.Joka.EmoteTome",
     "package": "EmoteTome.dll",
     "manifest_version": 1,

@@ -964,7 +964,8 @@ namespace EmoteTome
 
             try
             {
-                for (int i = 0; i < coreEmoteList.Count; i++)
+                int count = Math.Min(coreSettingList.Count, coreEmoteList.Count); // takes the lower count. may not load all emotes, if emote and settings are different
+                for (int i = 0; i < count; i++)
                 {
                     //System.Diagnostics.Debug.WriteLine("Haaaaiiiiii_______________________");
                     //System.Diagnostics.Debug.WriteLine("item1: " + coreSettingList[i].DisplayName + "item2: " + coreEmoteList[i].getToolTipp()[0]);
@@ -1033,7 +1034,8 @@ namespace EmoteTome
 
             try
             {
-                for (int i = 0; i < unlockEmoteList.Count; i++)
+                int count = Math.Min(unlockEmoteList.Count, unlockSettingList.Count); // takes the lower count. may not load all emotes, if emote and settings are different
+                for (int i = 0; i < count; i++)
                 {
                     //System.Diagnostics.Debug.WriteLine("item1: " + coreSettingList[i].DisplayName + "item2: " + coreEmoteList[i].getToolTipp()[0]);
                     unlockEmoteSettingMap.Add(new Tuple<SettingEntry<bool>, Emote>(unlockSettingList[i], unlockEmoteList[i]));
@@ -1076,9 +1078,9 @@ namespace EmoteTome
 
             try
             {
+                int count = Math.Min(rankEmoteList.Count, rankSettingList.Count); // takes the lower count. may not load all emotes, if emote and settings are different
                 for (int i = 0; i < rankEmoteList.Count; i++)
                 {
-                    //System.Diagnostics.Debug.WriteLine("Haaaaiiiiii_______________________");
                     //System.Diagnostics.Debug.WriteLine("item1: " + coreSettingList[i].DisplayName + "item2: " + coreEmoteList[i].getToolTipp()[0]);
                     rankEmoteSettingMap.Add(new Tuple<SettingEntry<bool>, Emote>(rankSettingList[i], rankEmoteList[i]));
                 }
