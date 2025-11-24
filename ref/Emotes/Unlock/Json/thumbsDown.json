@@ -1,0 +1,12 @@
+{
+    "imagePath": "Emotes/Unlock/Icons/ThumbsDown.png",
+    "toolTipp": [
+        "ThumbsDown",
+        "Poucebas",
+        "Daumenrunter",
+        "Nomegusta"
+    ],
+    "chatCode": "thumbsdown",
+    "canTarget": false,
+    "category": "unlock"
+}

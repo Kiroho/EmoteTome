@@ -29,3 +29,8 @@ blowkiss
 magictrick
 channel
 barbecue
+drink
+crabdance
+shocked
+thumbsup
+thumbsdown

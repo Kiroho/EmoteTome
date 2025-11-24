@@ -1,0 +1,12 @@
+{
+    "imagePath": "Emotes/Unlock/Icons/ThumbsUp.png",
+    "toolTipp": [
+        "ThumbsUp",
+        "Poucehaut",
+        "Daumenhoch",
+        "Megusta"
+    ],
+    "chatCode": "thumbsup",
+    "canTarget": false,
+    "category": "unlock"
+}

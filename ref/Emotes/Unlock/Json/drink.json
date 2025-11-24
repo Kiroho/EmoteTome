@@ -1,0 +1,12 @@
+{
+    "imagePath": "Emotes/Unlock/Icons/drink.png",
+    "toolTipp": [
+        "Drink",
+        "boire",
+        "Trinken",
+        "Beber"
+    ],
+    "chatCode": "drink",
+    "canTarget": false,
+    "category": "unlock"
+}

@@ -112,6 +112,11 @@ namespace EmoteTome
         private SettingEntry<bool> _showMagicTrick;
         private SettingEntry<bool> _showChannel;
         private SettingEntry<bool> _showBarbecue;
+        private SettingEntry<bool> _showDrink;
+        private SettingEntry<bool> _showCrabDance;
+        private SettingEntry<bool> _showShocked;
+        private SettingEntry<bool> _showThumbsUp;
+        private SettingEntry<bool> _showThumbsDown;
         private List<Tuple<SettingEntry<bool>, Emote>> unlockEmoteSettingMap = new List<Tuple<SettingEntry<bool>, Emote>>();
 
         //bools for rank emotes
@@ -472,6 +477,31 @@ namespace EmoteTome
                 "Show Barbecue",
                 true,
                 () => BadLocalization.BARBECUE[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showDrink = settings.DefineSetting(
+                "Show Drink",
+                true,
+                () => BadLocalization.DRINK[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showCrabDance = settings.DefineSetting(
+                "Show CrabDance",
+                true,
+                () => BadLocalization.CRABDANCE[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showShocked = settings.DefineSetting(
+                "Show Shocked",
+                true,
+                () => BadLocalization.SHOCKED[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showThumbsUp = settings.DefineSetting(
+                "Show ThumbsUp",
+                true,
+                () => BadLocalization.THUMBSUP[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showThumbsDown = settings.DefineSetting(
+                "Show ThumbsDown",
+                true,
+                () => BadLocalization.THUMBSDOWN[language],
                 () => BadLocalization.EMOTETEXT[language]);
 
             #endregion
@@ -995,6 +1025,11 @@ namespace EmoteTome
             unlockSettingList.Add(_showMagicTrick);
             unlockSettingList.Add(_showChannel);
             unlockSettingList.Add(_showBarbecue);
+            unlockSettingList.Add(_showDrink);
+            unlockSettingList.Add(_showCrabDance);
+            unlockSettingList.Add(_showShocked);
+            unlockSettingList.Add(_showThumbsUp);
+            unlockSettingList.Add(_showThumbsDown);
 
             try
             {
@@ -1260,10 +1295,10 @@ namespace EmoteTome
                     
                 }
             }
-
+            #endregion
             tomeCornerIcon.Visible = true;
         }
-        #endregion
+        
 
         private void showHideEmotes(List<Tuple<SettingEntry<bool>, Emote>> tupleList, Panel panel)
         {
@@ -1618,7 +1653,12 @@ namespace EmoteTome
                             emote.getChatCode().Equals("blowkiss") ||
                             emote.getChatCode().Equals("magictrick") ||
                             emote.getChatCode().Equals("channel") ||
-                            emote.getChatCode().Equals("barbecue"))
+                            emote.getChatCode().Equals("barbecue")||
+                            emote.getChatCode().Equals("drink")||
+                            emote.getChatCode().Equals("crabdance")||
+                            emote.getChatCode().Equals("shocked")||
+                            emote.getChatCode().Equals("thumbsup") ||
+                            emote.getChatCode().Equals("thumbsdown"))
                         {
                             emote.getContainer().Enabled = true;
                             emote.getContainer().getImage().Tint = activatedColor;

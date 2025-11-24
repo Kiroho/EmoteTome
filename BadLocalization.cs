@@ -488,6 +488,36 @@ namespace EmoteTome
             "Grillen",
             "Barbacoa"
             };
+        public static readonly List<String> DRINK = new List<String> {
+            "Drink",
+            "boire",
+            "Trinken",
+            "Beber"
+            };
+        public static readonly List<String> CRABDANCE = new List<String> {
+            "Crabdance",
+            "danseducrabe",
+            "Krabbentanz",
+            "bailedelcangrejo"
+            };
+        public static readonly List<String> SHOCKED = new List<String> {
+            "Shocked",
+            "Choque",
+            "Schockiert",
+            "Impactado"
+            };
+        public static readonly List<String> THUMBSUP = new List<String> {
+            "ThumbsUp",
+            "Poucehaut",
+            "Daumenhoch",
+            "Megusta"
+            };
+        public static readonly List<String> THUMBSDOWN = new List<String> {
+            "ThumbsDown",
+            "Poucebas",
+            "Daumenrunter",
+            "Nomegusta"
+            };
 
         #endregion
 

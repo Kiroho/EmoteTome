@@ -1,0 +1,12 @@
+{
+    "imagePath": "Emotes/Unlock/Icons/Shocked.png",
+    "toolTipp": [
+        "Shocked",
+        "Choque",
+        "Schockiert",
+        "Impactado"
+    ],
+    "chatCode": "shocked",
+    "canTarget": false,
+    "category": "unlock"
+}

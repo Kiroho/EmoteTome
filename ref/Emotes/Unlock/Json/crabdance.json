@@ -1,0 +1,12 @@
+{
+    "imagePath": "Emotes/Unlock/Icons/CrabDance.png",
+    "toolTipp": [
+        "Crabdance",
+        "danseducrabe",
+        "Krabbentanz",
+        "bailedelcangrejo"
+    ],
+    "chatCode": "crabdance",
+    "canTarget": false,
+    "category": "unlock"
+}
