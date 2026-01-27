@@ -9,7 +9,7 @@ using Image = Blish_HUD.Controls.Image;
 
 namespace Blish_HUD.Controls
 {
-    class EmoteContainer : Container
+    public class EmoteContainer : Container
     {
         //Container that is used to organize image + label of an emote.
 

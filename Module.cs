@@ -28,28 +28,31 @@ namespace EmoteTome
     {
         private CornerIcon tomeCornerIcon;
         private StandardWindow tomeWindow;
-        private int language = BadLocalization.ENGLISH;
+        public Checkbox targetCheckbox;
+        public Checkbox synchronCheckbox;
+        public int language = BadLocalization.ENGLISH;
         private Vector3 currentPositionA;
         private Vector3 currentPositionB;
         private Vector3 currentPositionC;
         private int checkPositionSwitch = 0;
         private List<Emote> coreEmoteList = new List<Emote>();
+        private List<EmoteContainer> coreEmoteContainers = new List<EmoteContainer>();
         private List<Emote> unlockEmoteList = new List<Emote>();
+        private List<EmoteContainer> unlockEmoteContainers = new List<EmoteContainer>();
         private List<Emote> rankEmoteList = new List<Emote>();
+        private List<EmoteContainer> cooldownEmoteContainers = new List<EmoteContainer>();
         private Color activatedColor = new Color(250, 250, 250);
         private Color lockedColor = new Color(30, 30, 30);
         private Color noTargetColor = new Color(130, 130, 130);
         private Color cooldownColor = new Color(50, 50, 50);
         private bool checkedAPIForUnlock = false;
-        private EventHandler<Blish_HUD.Input.MouseEventArgs> coreEmoteClickEvent = delegate { };
-        private EventHandler<Blish_HUD.Input.MouseEventArgs> unlockEmoteClickEvent = delegate { };
-        private EventHandler<Blish_HUD.Input.MouseEventArgs> rankEmoteClickEvent = delegate { };
-        private EventHandler<Blish_HUD.Input.MouseEventArgs> testEmoteClickEvent = delegate { };
+        private EventHandler<Blish_HUD.Input.MouseEventArgs> emoteClickEvent = delegate { };
         private SettingEntry<bool> _showEmoteNames;
         private SettingEntry<bool> _adjustLabelLength;
         private SettingEntry<bool> _halloweenMode;
         private SettingEntry<bool> _checkForKeyPress;
         private SettingEntry<bool> _checkForMovement;
+        private SettingEntry<List<String>> _favorites;
 
         //bools for core emotes
         private SettingEntry<string> _coreEmoteSeparator;
@@ -133,11 +136,16 @@ namespace EmoteTome
         private SettingEntry<bool> _showRankDragon;
         private List<Tuple<SettingEntry<bool>, Emote>> rankEmoteSettingMap = new List<Tuple<SettingEntry<bool>, Emote>>();
 
+
+        private SettingEntry<bool> _hideCoreEmotes;
+        private SettingEntry<bool> _hideUnlockEmotes;
+        private SettingEntry<bool> _hideRankEmotes;
+
         private int size = 64;
         private int labelSize = 16;
         private int labelWidth = 120;
-
-
+        private FavoriteBar favoriteBar;
+        private List<string> unlockedEmotes = new List<String>();
         private static readonly Logger Logger = Logger.GetLogger<Module>();
 
         internal SettingsManager SettingsManager => this.ModuleParameters.SettingsManager;
@@ -156,6 +164,28 @@ namespace EmoteTome
         // between updates to both Blish HUD and your module.
         protected override void DefineSettings(SettingCollection settings)
         {
+
+            _hideCoreEmotes = settings.DefineSetting(
+            "Hide Core Emote Panel",
+            false,
+            () => BadLocalization.HIDECOREEMOTE[language],
+            () => BadLocalization.HIDECOREEMOTE[language]);
+
+            _hideUnlockEmotes = settings.DefineSetting(
+             "Hide Unlockable Emote Panel",
+             false,
+             () => BadLocalization.HIDEUNLOCKEMOTE[language],
+             () => BadLocalization.HIDEUNLOCKEMOTE[language]);
+
+            _hideRankEmotes = settings.DefineSetting(
+             "Hide Rank Emote Panel",
+             false,
+             () => BadLocalization.HIDERANKEMOTE[language],
+             () => BadLocalization.HIDERANKEMOTE[language]);
+
+
+
+
             _checkForKeyPress = settings.DefineSetting(
                 "Check for Key Press",
                 true,
@@ -185,6 +215,13 @@ namespace EmoteTome
                 false,
                 () => BadLocalization.HALLOWEENMODE[language],
                 () => BadLocalization.HALLOWEENMODETEXT[language]);
+
+            _favorites = settings.DefineSetting(
+                "favorite_emotes",
+                new List<string>(),
+                () => "Favorite Emotes",
+                () => "Liste der favorisierten Emotes"
+            );
 
             #region Show/Hide Core Emotes
 
@@ -612,7 +649,6 @@ namespace EmoteTome
                 }
             };
 
-
             //Main Window
             tomeWindow = new StandardWindow(
                 ContentsManager.GetTexture("WindowBackground.png"),
@@ -627,7 +663,7 @@ namespace EmoteTome
                 CanResize = true
             };
 
-            var targetCheckbox = new Checkbox()
+            targetCheckbox = new Checkbox()
             {
                 Text = BadLocalization.TARGETCHECKBOXTEXT[language],
                 Location = new Point(0, 0),
@@ -635,12 +671,35 @@ namespace EmoteTome
                 Parent = tomeWindow
             };
 
-            var synchronCheckbox = new Checkbox()
+            synchronCheckbox = new Checkbox()
             {
                 Text = BadLocalization.SYNCHRONCHECKBOXTEXT[language],
                 Location = new Point(0, 20),
                 BasicTooltipText = BadLocalization.SYNCHRONCHECKBOXTOOLTIP[language],
                 Parent = tomeWindow
+            };
+
+            var halloweenCheckbox = new Checkbox()
+            {
+                Text = BadLocalization.HALLOWEENMODE[language],
+                Location = new Point(200, 0),
+                BasicTooltipText = BadLocalization.HALLOWEENMODETEXT[language],
+                Parent = tomeWindow,
+                Checked = _halloweenMode.Value
+            };
+
+            var favoritesButton = new StandardButton()
+            {
+                Text = BadLocalization.FAVORITESBAR[language],
+                Location = new Point(200, 20),
+                Parent = tomeWindow,
+            };
+            favoritesButton.Click += (s, e) =>
+            {
+                if (favoriteBar != null)
+                {
+                    favoriteBar.ToggleWindow();
+                }
             };
 
             //Mainpanel
@@ -659,7 +718,7 @@ namespace EmoteTome
             //Create Core Emotes______________________________________________________________________________
             #region Create Core Emotes
             coreEmoteList = library.loadCoreEmotes();
-            List<EmoteContainer> coreEmoteContainers = new List<EmoteContainer>();
+            coreEmoteContainers = new List<EmoteContainer>();
 
             //Panel for core emotes
             var corePanel = new FlowPanel()
@@ -675,64 +734,16 @@ namespace EmoteTome
                 ControlPadding = new Vector2(5, 5),
                 OuterControlPadding = new Vector2(5, 5)
             };
-            
+
+            if (_hideCoreEmotes.Value)
+            {
+                corePanel.Visible = false;
+            }
+
 
             //Create Emote Images
-            foreach (Emote emote in coreEmoteList)
-            {
-                if (emote.getCategory().Equals(EmoteLibrary.CORECODE))
-                {
-
-                    var emoteContainer = new EmoteContainer()
-                    {
-                        Size = new Point(size, size),
-                        BasicTooltipText = emote.getToolTipp()[language],
-                        Parent = corePanel
-                    };
-
-                    var emoteImage = new Image(ContentsManager.GetTexture(emote.getImagePath()))
-                    {
-                        Size = new Point(size, size),
-                        BasicTooltipText = emote.getToolTipp()[language],
-                        ZIndex = 1,
-                        Parent = emoteContainer
-                    };
-
-                    var emoteLabel = new Label
-                    {
-                        Text = emote.getToolTipp()[language],
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        Size = new Point(size, labelSize),
-                        ZIndex = 2,
-                        Parent = emoteContainer,
-                        AutoSizeWidth = false,
-                        Visible = false,
-                        BackgroundColor = Color.Black,
-                        Location = new Point(0, size-1)
-                    };
-
-                    ////Add controls to container
-                    emoteContainer.setImage(emoteImage);
-                    emoteContainer.setLabel(emoteLabel);
-
-                    //OnClick Listener
-                    coreEmoteClickEvent = delegate
-                    {
-                        if (emoteAllowed())
-                        {
-                            //ScreenNotification.ShowNotification(emote.getToolTipp()[language]);
-                            //Activate Emote
-                            activateEmote(emote.getChatCode(), targetCheckbox.Checked, synchronCheckbox.Checked);
-                        }
-                    };
-                    emoteContainer.Click += coreEmoteClickEvent;
-                    //coreEmoteImages.Add(emoteImage);
-                    coreEmoteContainers.Add(emoteContainer);
-                    //emote.setImg(emoteImage);
-                    emote.setContainer(emoteContainer);
-
-                }
-            }
+            createEmoteContainer(coreEmoteList, corePanel, EmoteLibrary.CORECODE, false);
+            
             #endregion
 
 
@@ -740,7 +751,7 @@ namespace EmoteTome
             #region Create Unlockable Emotes
             unlockEmoteList = library.loadUnlockEmotes();
             //List<Image> unlockEmoteImages = new List<Image>();
-            List<EmoteContainer> unlockEmoteContainers = new List<EmoteContainer>();
+            unlockEmoteContainers = new List<EmoteContainer>();
 
             //Panel for unlockable Emotes
             var unlockablePanel = new FlowPanel()
@@ -757,70 +768,21 @@ namespace EmoteTome
                 OuterControlPadding = new Vector2(5, 5)
             };
 
+            if (_hideUnlockEmotes.Value)
+            {
+                unlockablePanel.Visible = false;
+            }
 
             //Create Emote Images
-            foreach (Emote emote in unlockEmoteList)
-            {
-                if (emote.getCategory().Equals(EmoteLibrary.UNLOCKCODE))
-                {
-                    var emoteContainer = new EmoteContainer()
-                    {
-                        Size = new Point(size, size),
-                        BasicTooltipText = emote.getToolTipp()[language],
-                        Parent = unlockablePanel
-                    };
-
-                    var emoteImage = new Image(ContentsManager.GetTexture(emote.getImagePath()))
-                    {
-                        Size = new Point(size, size),
-                        BasicTooltipText = emote.getToolTipp()[language],
-                        ZIndex = 1,
-                        Parent = emoteContainer,
-                        Tint = lockedColor,
-                        Enabled = false
-                    };
-
-                    var emoteLabel = new Label
-                    {
-                        Text = emote.getToolTipp()[language],
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        Size = new Point(size, labelSize),
-                        ZIndex = 2,
-                        Parent = emoteContainer,
-                        AutoSizeWidth = false,
-                        Visible = false,
-                        BackgroundColor = Color.Black,
-                        Location = new Point(0, size - 1)
-                    };
-
-                    ////Add controls to container
-                    emoteContainer.setImage(emoteImage);
-                    emoteContainer.setLabel(emoteLabel);
-
-
-                    //OnClick Listener
-                    unlockEmoteClickEvent = delegate
-                    {
-                        if (emoteAllowed())
-                        {
-                            //ScreenNotification.ShowNotification(emote.getToolTipp()[language]);
-                            //Activate Emote
-                            activateEmote(emote.getChatCode(), targetCheckbox.Checked, synchronCheckbox.Checked);
-                        }
-                    };
-                    emoteContainer.Click += unlockEmoteClickEvent;
-                    unlockEmoteContainers.Add(emoteContainer);
-                    emote.setContainer(emoteContainer);
-                    emote.isDeactivatedByLocked(true);
-                }
-            }
+            createEmoteContainer(unlockEmoteList, unlockablePanel, EmoteLibrary.UNLOCKCODE, false);
+            
             #endregion
 
 
             //Create Rank Emotes______________________________________________________________________________
             #region Create Rank Emotes
             rankEmoteList = library.loadRankEmotes();
-            List<EmoteContainer> cooldownEmoteContainers = new List<EmoteContainer>();
+            cooldownEmoteContainers = new List<EmoteContainer>();
 
             //Panel for Rank Emotes
             var rankPanel = new FlowPanel()
@@ -837,76 +799,25 @@ namespace EmoteTome
                 OuterControlPadding = new Vector2(5, 5),
             };
 
-            //Create Emote Images
-            foreach (Emote emote in rankEmoteList)
+            if (_hideRankEmotes.Value)
             {
-                if (emote.getCategory().Equals(EmoteLibrary.RANKCODE))
-                {
-                    var emoteContainer = new EmoteContainer()
-                    {
-                        Size = new Point(size, size),
-                        BasicTooltipText = emote.getToolTipp()[language],
-                        Parent = rankPanel
-                    };
-
-                    var emoteImage = new Image(ContentsManager.GetTexture(emote.getImagePath()))
-                    {
-                        Size = new Point(size, size),
-                        BasicTooltipText = emote.getToolTipp()[language],
-                        ZIndex = 1,
-                        Parent = emoteContainer,
-                        Tint = lockedColor,
-                        Enabled = false
-                    };
-
-                    var emoteLabel = new Label
-                    {
-                        Text = emote.getToolTipp()[language],
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        Size = new Point(size, labelSize),
-                        ZIndex = 2,
-                        Parent = emoteContainer,
-                        AutoSizeWidth = false,
-                        Visible = false,
-                        BackgroundColor = Color.Black,
-                        Location = new Point(0, size - 1)
-                    };
-
-                    var cooldownLabel = new Label
-                    {
-                        Text = "60",
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        Size = new Point(size, size),
-                        ZIndex = 3,
-                        Font = GameService.Content.DefaultFont32,
-                        Parent = emoteContainer,
-                        AutoSizeWidth = false,
-                        Visible = false
-                    };
-
-                    ////Add controls to container
-                    emoteContainer.setImage(emoteImage);
-                    emoteContainer.setLabel(emoteLabel);
-                    emoteContainer.setCooldownLabel(cooldownLabel);
-
-                    //OnClick Listener
-                    rankEmoteClickEvent = delegate
-                    {
-                        if (emoteAllowed())
-                        {
-                            //ScreenNotification.ShowNotification(emote.getToolTipp()[language]);
-                            //Activate Emote
-                            activateEmote(emote.getChatCode(), targetCheckbox.Checked, synchronCheckbox.Checked);
-                            activateCooldown();
-                        }
-                    };
-                    emoteContainer.Click += rankEmoteClickEvent;
-                    cooldownEmoteContainers.Add(emoteContainer); 
-                    emote.setContainer(emoteContainer);
-                    emote.isDeactivatedByLocked(true);
-                }
+                rankPanel.Visible = false;
             }
+
+
+            //Create Emote Images
+            createEmoteContainer(rankEmoteList, rankPanel, EmoteLibrary.RANKCODE, false);
+            
             #endregion
+
+
+            #region Favorite Bar
+
+            favoriteBar = new FavoriteBar(this, ContentsManager, coreEmoteList, unlockEmoteList, rankEmoteList);
+            
+            #endregion
+
+
 
             //Spacer for bottom
             var spacePanel = new Panel()
@@ -967,7 +878,6 @@ namespace EmoteTome
                 int count = Math.Min(coreSettingList.Count, coreEmoteList.Count); // takes the lower count. may not load all emotes, if emote and settings are different
                 for (int i = 0; i < count; i++)
                 {
-                    //System.Diagnostics.Debug.WriteLine("Haaaaiiiiii_______________________");
                     //System.Diagnostics.Debug.WriteLine("item1: " + coreSettingList[i].DisplayName + "item2: " + coreEmoteList[i].getToolTipp()[0]);
                     coreEmoteSettingMap.Add(new Tuple<SettingEntry<bool>, Emote>(coreSettingList[i], coreEmoteList[i]));
                 }
@@ -987,9 +897,8 @@ namespace EmoteTome
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);
             }
 
-            corePanel.Collapse();
-            await Task.Delay(75);
-            corePanel.Expand();
+
+            mainPanel.RecalculateLayout();
             #endregion
 
             #region unlockable emote settings
@@ -1057,9 +966,8 @@ namespace EmoteTome
 
             }
 
-            unlockablePanel.Collapse();
-            await Task.Delay(75);
-            unlockablePanel.Expand();
+
+            mainPanel.RecalculateLayout();
             #endregion
 
             #region rank emote settings
@@ -1098,15 +1006,59 @@ namespace EmoteTome
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);
             }
 
-            rankPanel.Collapse();
-            await Task.Delay(75);
-            rankPanel.Expand();
+
+            mainPanel.RecalculateLayout();
             #endregion
 
             #endregion
 
             //When Setting changes
             #region On Setting Change
+
+            _hideCoreEmotes.PropertyChanged += (_, e) =>
+            {
+                if (_hideCoreEmotes.Value)
+                {
+                    corePanel.Visible = false;
+                    mainPanel.RecalculateLayout();
+                }
+                else
+                {
+                    corePanel.Visible = true;
+                    mainPanel.RecalculateLayout();
+                }
+            };
+
+            _hideUnlockEmotes.PropertyChanged += (_, e) =>
+            {
+                if (_hideUnlockEmotes.Value)
+                {
+                    unlockablePanel.Visible = false;
+                    mainPanel.RecalculateLayout();
+                }
+                else
+                {
+                    unlockablePanel.Visible = true;
+                    mainPanel.RecalculateLayout();
+                }
+            };
+
+            _hideRankEmotes.PropertyChanged += (_, e) =>
+            {
+                if (_hideRankEmotes.Value)
+                {
+                    rankPanel.Visible = false;
+                    mainPanel.RecalculateLayout();
+                }
+                else
+                {
+                    rankPanel.Visible = true;
+                    mainPanel.RecalculateLayout();
+                }
+            };
+
+
+
             _showEmoteNames.PropertyChanged += (_, e) =>
             {
                 if (_showEmoteNames.Value)
@@ -1144,10 +1096,12 @@ namespace EmoteTome
                 if (_halloweenMode.Value)
                 {
                     halloweenMode(_halloweenMode, true);
+                    halloweenCheckbox.Checked = true;
                 }
                 else
                 {
                     halloweenMode(_halloweenMode, false);
+                    halloweenCheckbox.Checked = false;
                 }
                 
             };
@@ -1178,129 +1132,221 @@ namespace EmoteTome
             };
 
             //When target checkbox is clicked
-            targetCheckbox.CheckedChanged += (_, e) =>
+            targetCheckbox.CheckedChanged += (_, e) => 
             {
-                if (targetCheckbox.Checked)
+                setTargetCheckbox();
+                favoriteBar.targetCheckbox.Checked = targetCheckbox.Checked;
+            };
+
+            synchronCheckbox.CheckedChanged += (_, e) =>
+            {
+                favoriteBar.synchronCheckbox.Checked = synchronCheckbox.Checked;
+            };
+
+            halloweenCheckbox.CheckedChanged += (_, e) =>
+            {
+                if (halloweenCheckbox.Checked)
                 {
-                    foreach (Emote emote in coreEmoteList)
+                    _halloweenMode.Value = true;
+                }
+                else
+                {
+                    _halloweenMode.Value = false;
+                }
+
+
+            };
+
+
+            #endregion
+
+            
+            tomeCornerIcon.Visible = true;
+        }
+
+
+        public void setTargetCheckbox()
+        {
+            if (targetCheckbox.Checked)
+            {
+                foreach (Emote emote in coreEmoteList)
+                {
+                    if (!emote.hasTarget())
                     {
-                        if (!emote.hasTarget())
+                        emote.getContainer().getImage().Tint = noTargetColor;
+                        if (emote.getFavContainer() != null)
+                        {
+                            emote.getFavContainer().getImage().Tint = noTargetColor;
+                        }
+                        emote.isDeactivatedByTargeting(true);
+                    }
+                }
+                foreach (Emote emote in unlockEmoteList)
+                {
+                    if (!emote.hasTarget() && !emote.isDeactivatedByLocked())
+                    {
+                        emote.getContainer().getImage().Tint = noTargetColor;
+                        if (emote.getFavContainer() != null)
+                        {
+                            emote.getFavContainer().getImage().Tint = noTargetColor;
+                        }
+                        emote.isDeactivatedByTargeting(true);
+                    }
+                }
+                foreach (Emote emote in rankEmoteList)
+                {
+                    if (!emote.hasTarget() && !emote.isDeactivatedByLocked())
+                    {
+                        if (!emote.isDeactivatedByCooldown())
                         {
                             emote.getContainer().getImage().Tint = noTargetColor;
-                            emote.isDeactivatedByTargeting(true);
+                            if (emote.getFavContainer() != null)
+                            {
+                                emote.getFavContainer().getImage().Tint = noTargetColor;
+                            }
                         }
+                        emote.isDeactivatedByTargeting(true);
                     }
-                    foreach (Emote emote in unlockEmoteList)
+                }
+            }
+            else
+            {
+                foreach (Emote emote in coreEmoteList)
+                {
+                    emote.getContainer().getImage().Tint = activatedColor;
+                    if (emote.getFavContainer() != null)
                     {
-                        if (!emote.hasTarget() && !emote.isDeactivatedByLocked())
+                        emote.getFavContainer().getImage().Tint = activatedColor;
+                    }
+                    emote.isDeactivatedByTargeting(false);
+                }
+                foreach (Emote emote in unlockEmoteList)
+                {
+                    if (!emote.isDeactivatedByLocked())
+                    {
+                        emote.getContainer().getImage().Tint = activatedColor;
+                        if (emote.getFavContainer() != null)
                         {
-                            emote.getContainer().getImage().Tint = noTargetColor;
-                            emote.isDeactivatedByTargeting(true);
+                            emote.getFavContainer().getImage().Tint = activatedColor;
                         }
                     }
+                    emote.isDeactivatedByTargeting(false);
+                }
+                foreach (Emote emote in rankEmoteList)
+                {
+                    if (!emote.isDeactivatedByCooldown() && !emote.isDeactivatedByLocked())
+                    {
+                        emote.getContainer().getImage().Tint = activatedColor;
+                        if (emote.getFavContainer() != null)
+                        {
+                            emote.getFavContainer().getImage().Tint = activatedColor;
+                        }
+                    }
+                    emote.isDeactivatedByTargeting(false);
+
+                }
+            }
+        }
+        //Set Cooldown for Rank Emotes
+        public void activateCooldown()
+        {
+            int cooldown = 60;
+            foreach (Emote emote in rankEmoteList)
+            {
+                if (!emote.isDeactivatedByLocked())
+                {
+                    emote.getContainer().getImage().Tint = cooldownColor;
+                    emote.getContainer().Enabled = false;
+                    emote.isDeactivatedByCooldown(true);
+
+                    emote.getContainer().getCooldownLabel().Text = cooldown.ToString();
+                    emote.getContainer().getCooldownLabel().Visible = true;
+
+                    if (emote.getFavContainer() != null)
+                    {
+                        emote.getFavContainer().getImage().Tint = cooldownColor;
+                        emote.getFavContainer().Enabled = false;
+
+                        emote.getFavContainer().getCooldownLabel().Text = cooldown.ToString();
+                        emote.getFavContainer().getCooldownLabel().Visible = true;
+                    }
+
+
+
+                }
+
+            }
+
+            System.Timers.Timer aTimer = new System.Timers.Timer();
+            aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            //aTimer.Interval = 60000;
+            aTimer.Interval = 1000;
+            aTimer.Enabled = true;
+
+            void OnTimedEvent(object source, ElapsedEventArgs e)
+            {
+                if (cooldown >= 1)
+                {
+                    cooldown--;
                     foreach (Emote emote in rankEmoteList)
                     {
-                        if (!emote.hasTarget() && !emote.isDeactivatedByLocked())
+                        emote.getContainer().getCooldownLabel().Text = cooldown.ToString();
+
+                        if (emote.getFavContainer() != null)
                         {
-                            if (!emote.isDeactivatedByCooldown())
-                            {
-                                emote.getContainer().getImage().Tint = noTargetColor;
-                            }
-                            emote.isDeactivatedByTargeting(true);
+                            emote.getFavContainer().getImage().Tint = cooldownColor;
+                            emote.getFavContainer().Enabled = false;
+
+                            emote.getFavContainer().getCooldownLabel().Text = cooldown.ToString();
+                            emote.getFavContainer().getCooldownLabel().Visible = true;
                         }
                     }
                 }
                 else
                 {
-                    foreach (Emote emote in coreEmoteList)
-                    {
-                        emote.getContainer().getImage().Tint = activatedColor;
-                        emote.isDeactivatedByTargeting(false);
-                    }
-                    foreach (Emote emote in unlockEmoteList)
-                    {
-                        if (!emote.isDeactivatedByLocked())
-                        {
-                            emote.getContainer().getImage().Tint = activatedColor;
-                        }
-                        emote.isDeactivatedByTargeting(false);
-                    }
+                    cooldown = 60;
+                    aTimer.Enabled = false;
                     foreach (Emote emote in rankEmoteList)
                     {
-                        if (!emote.isDeactivatedByCooldown() && !emote.isDeactivatedByLocked())
+                        emote.getContainer().getCooldownLabel().Visible = false;
+                        if (!emote.isDeactivatedByLocked())
                         {
-                            emote.getContainer().getImage().Tint = activatedColor;
+                            if (emote.isDeactivatedByTargeting())
+                            {
+                                emote.getContainer().getImage().Tint = noTargetColor;
+                            }
+                            else
+                            {
+                                emote.getContainer().getImage().Tint = activatedColor;
+                            }
+                            emote.getContainer().Enabled = true;
+                            emote.isDeactivatedByCooldown(false);
                         }
-                        emote.isDeactivatedByTargeting(false);
 
-                    }
-                }
-            };
-            #endregion
-
-            //Set Cooldown for Rank Emotes
-            #region Rank Emotes Cooldown
-            void activateCooldown()
-            {
-                int cooldown = 60;
-                foreach (Emote emote in rankEmoteList)
-                {
-                    if (!emote.isDeactivatedByLocked())
-                    {
-                        emote.getContainer().getImage().Tint = cooldownColor;
-                        emote.getContainer().Enabled = false;
-                        emote.isDeactivatedByCooldown(true);
-
-                        emote.getContainer().getCooldownLabel().Text = cooldown.ToString();
-                        emote.getContainer().getCooldownLabel().Visible = true;
-                    }
-
-                }
-
-                System.Timers.Timer aTimer = new System.Timers.Timer();
-                aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-                //aTimer.Interval = 60000;
-                aTimer.Interval = 1000;
-                aTimer.Enabled = true;
-                void OnTimedEvent(object source, ElapsedEventArgs e)
-                {
-                    if (cooldown >= 1)
-                    {
-                        cooldown--;
-                        foreach (Emote emote in rankEmoteList)
+                        if (emote.getFavContainer() != null)
                         {
-                            emote.getContainer().getCooldownLabel().Text = cooldown.ToString();
-                        }
-                    }
-                    else
-                    {
-                        cooldown = 60;
-                        aTimer.Enabled = false;
-                        foreach (Emote emote in rankEmoteList)
-                        {
-                            emote.getContainer().getCooldownLabel().Visible = false;
+                            emote.getFavContainer().getCooldownLabel().Visible = false;
                             if (!emote.isDeactivatedByLocked())
                             {
                                 if (emote.isDeactivatedByTargeting())
                                 {
-                                    emote.getContainer().getImage().Tint = noTargetColor;
+                                    emote.getFavContainer().getImage().Tint = noTargetColor;
                                 }
                                 else
                                 {
-                                    emote.getContainer().getImage().Tint = activatedColor;
+                                    emote.getFavContainer().getImage().Tint = activatedColor;
                                 }
-                                emote.getContainer().Enabled = true;
+                                emote.getFavContainer().Enabled = true;
                                 emote.isDeactivatedByCooldown(false);
                             }
                         }
+
+
                     }
-                    
                 }
+
             }
-            #endregion
-            tomeCornerIcon.Visible = true;
         }
-        
 
         private void showHideEmotes(List<Tuple<SettingEntry<bool>, Emote>> tupleList, Panel panel)
         {
@@ -1354,6 +1400,33 @@ namespace EmoteTome
             _showThanks.Value = !value;
         }
 
+        public void addToFavoriteSetting(String favoriteEntry)
+        {
+            _favorites.Value.Add(favoriteEntry);
+        }
+        public void removeFromFavoriteSetting(String favoriteEntry)
+        {
+            _favorites.Value.Remove(favoriteEntry);
+        }
+        public List<String> getFavoriteList()
+        {
+            return _favorites.Value;
+        }
+
+        public bool getShowEmoteNames()
+        {
+            return _showEmoteNames.Value;
+        }
+        public bool getAdjustLabelLength()
+        {
+            return _adjustLabelLength.Value;
+        }
+        public bool getTargetChecked()
+        {
+            return targetCheckbox.Checked;
+        }
+
+
         protected override void Update(GameTime gameTime)
         {
             //Check if player is moving, when emote window is opened
@@ -1381,20 +1454,29 @@ namespace EmoteTome
         
         protected override void Unload()
         {
+            favoriteBar?.unload();
+            favoriteBar?.Dispose();
+
             foreach (var emote in coreEmoteList)
             {
-                emote.getContainer().Click -= coreEmoteClickEvent;
+                emote.getContainer().Click -= emoteClickEvent;
                 emote.getContainer()?.Dispose();
+                emote.getFavContainer().Click -= emoteClickEvent;
+                emote.getFavContainer()?.Dispose();
             }
             foreach (var emote in unlockEmoteList)
             {
-                emote.getContainer().Click -= unlockEmoteClickEvent;
+                emote.getContainer().Click -= emoteClickEvent;
                 emote.getContainer()?.Dispose();
+                emote.getFavContainer().Click -= emoteClickEvent;
+                emote.getFavContainer()?.Dispose();
             }
             foreach (var emote in rankEmoteList)
             {
-                emote.getContainer().Click -= rankEmoteClickEvent;
+                emote.getContainer().Click -= emoteClickEvent;
                 emote.getContainer()?.Dispose();
+                emote.getFavContainer().Click -= emoteClickEvent;
+                emote.getFavContainer()?.Dispose();
             }
             tomeWindow?.Dispose();
             tomeCornerIcon?.Dispose();
@@ -1403,7 +1485,7 @@ namespace EmoteTome
 
 
 
-        private void activateLongLabel(List<Emote> emoteList)
+        public void activateLongLabel(List<Emote> emoteList)
         {
             foreach (Emote emote in emoteList)
             {
@@ -1414,6 +1496,18 @@ namespace EmoteTome
                 if (emote.getContainer().getCooldownLabel() != null)
                 {
                     emote.getContainer().getCooldownLabel().Location = emote.getContainer().getImage().Location;
+                }
+
+                if (emote.getFavContainer() != null)
+                {
+                    emote.getFavContainer().WidthSizingMode = SizingMode.AutoSize;
+                    emote.getFavContainer().Size = new Point(size, size + labelSize);
+                    emote.getFavContainer().getLabel().Width = labelWidth;
+                    emote.getFavContainer().getImage().Location = new Point(labelWidth / 2 - size / 2, 0);
+                    if (emote.getFavContainer().getCooldownLabel() != null)
+                    {
+                        emote.getFavContainer().getCooldownLabel().Location = emote.getFavContainer().getImage().Location;
+                    }
                 }
 
             }
@@ -1440,14 +1534,42 @@ namespace EmoteTome
                 {
                     emote.getContainer().getCooldownLabel().Location = emote.getContainer().getImage().Location;
                 }
+
+
+                if (emote.getFavContainer() != null)
+                {
+                    emote.getFavContainer().WidthSizingMode = SizingMode.Standard;
+                    emote.getFavContainer().getLabel().Width = size;
+                    emote.getFavContainer().getImage().Location = new Point(0, 0);
+                    if (_showEmoteNames.Value)
+                    {
+                        emote.getFavContainer().Size = new Point(size, size + labelSize);
+                        emote.getFavContainer().getLabel().AutoSizeWidth = false;
+                    }
+                    else
+                    {
+                        emote.getFavContainer().Size = new Point(size, size);
+                    }
+                    if (emote.getFavContainer().getCooldownLabel() != null)
+                    {
+                        emote.getFavContainer().getCooldownLabel().Location = emote.getFavContainer().getImage().Location;
+                    }
+                }
+
             }
         }
-        private void activateNameLabel(List<Emote> emoteList)
+        public void activateNameLabel(List<Emote> emoteList)
         {
             foreach (Emote emote in emoteList)
             {
                 emote.getContainer().getLabel().Visible = true;
                 emote.getContainer().Size = new Point(size, size + labelSize);
+                if (emote.getFavContainer() != null)
+                {
+                    emote.getFavContainer().getLabel().Visible = true;
+                    emote.getFavContainer().Size = new Point(size, size + labelSize);
+                }
+
             }
         }
 
@@ -1457,13 +1579,18 @@ namespace EmoteTome
             {
                 emote.getContainer().getLabel().Visible = false;
                 emote.getContainer().Size = new Point(size, size);
+                if (emote.getFavContainer() != null)
+                {
+                    emote.getFavContainer().getLabel().Visible = false;
+                    emote.getFavContainer().Size = new Point(size, size);
+                }
             }
             _adjustLabelLength.Value = false;
         }
 
 
 
-        private bool emoteAllowed()
+        public bool emoteAllowed()
         {
             if (IsAnyKeyDown())
             {
@@ -1491,7 +1618,7 @@ namespace EmoteTome
             }
 
         }
-        private async void activateEmote(String emote, bool targetChecked, bool synchronChecked)
+        public async void activateEmote(String emote, bool targetChecked, bool synchronChecked)
         {
             String chatCommand = "/" + emote;
             if (targetChecked)
@@ -1622,26 +1749,24 @@ namespace EmoteTome
                     {
                         emote.getContainer().getImage().Tint = activatedColor;
                         emote.getContainer().Enabled = true;
+                        if (emote.getFavContainer() != null)
+                        {
+                            emote.getFavContainer().getImage().Tint = activatedColor;
+                            emote.getFavContainer().Enabled = true;
+                        }
                         emote.isDeactivatedByLocked(false);
                     }
 
 
 
-                    var unlockedEmotes = new List<string>(await Gw2ApiManager.Gw2ApiClient.V2.Account.Emotes.GetAsync());
+                    unlockedEmotes = new List<string>(await Gw2ApiManager.Gw2ApiClient.V2.Account.Emotes.GetAsync());
                     unlockedEmotes = unlockedEmotes.ConvertAll(d => d.ToLower());
                     foreach (Emote emote in unlockEmoteList)
                     {
-                        //Deactivate all unlockable emotes
                         //Exceptions for Emotes that are not yet included in API_____________
-                        if (//emote.getChatCode().Equals("bless") ||
-                            //emote.getChatCode().Equals("heroic") ||
-                            emote.getChatCode().Equals("hiss") ||
+                        if (emote.getChatCode().Equals("hiss") ||
                             emote.getChatCode().Equals("magicjuggle") ||
-                            //emote.getChatCode().Equals("paper") ||
-                            //emote.getChatCode().Equals("possessed") ||
                             emote.getChatCode().Equals("readbook") ||
-                            //emote.getChatCode().Equals("rock") ||
-                            //emote.getChatCode().Equals("scissors") ||
                             emote.getChatCode().Equals("serve") ||
                             emote.getChatCode().Equals("sipcoffee") ||
                             emote.getChatCode().Equals("unleash") ||
@@ -1664,6 +1789,11 @@ namespace EmoteTome
                         {
                             emote.getContainer().Enabled = true;
                             emote.getContainer().getImage().Tint = activatedColor;
+                            if (emote.getFavContainer() != null)
+                            {
+                                emote.getFavContainer().Enabled = true;
+                                emote.getFavContainer().getImage().Tint = activatedColor;
+                            }
                             emote.isDeactivatedByLocked(false);
                         }
 
@@ -1673,18 +1803,23 @@ namespace EmoteTome
                         //Activate unlocked emotes
                         if (unlockedEmotes.Contains(emote.getChatCode()))
                         {
-                            System.Diagnostics.Debug.WriteLine("_______________________________________________");
-                            System.Diagnostics.Debug.WriteLine("Freigeschalten: " + emote.getChatCode());
+                            //System.Diagnostics.Debug.WriteLine("_______________________________________________");
+                            //System.Diagnostics.Debug.WriteLine("Freigeschalten: " + emote.getChatCode());
 
                             emote.getContainer().Enabled = true;
                             emote.getContainer().getImage().Tint = activatedColor;
+                            if (emote.getFavContainer() != null)
+                            {
+                                emote.getFavContainer().Enabled = true;
+                                emote.getFavContainer().getImage().Tint = activatedColor;
+                            }
                             emote.isDeactivatedByLocked(false);
                         }
                     }
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("No permissions");
+                    //System.Diagnostics.Debug.WriteLine("No permissions");
                     foreach (Emote emote in unlockEmoteList)
                     {
                         enableLockedEmote(emote);
@@ -1697,6 +1832,11 @@ namespace EmoteTome
                     {
                         emote.getContainer().getImage().Tint = activatedColor;
                         emote.getContainer().Enabled = true;
+                        if (emote.getFavContainer() != null)
+                        {
+                            emote.getFavContainer().getImage().Tint = activatedColor;
+                            emote.getFavContainer().Enabled = true;
+                        }
                         emote.isDeactivatedByLocked(false);
                     }
                 }
@@ -1716,11 +1856,112 @@ namespace EmoteTome
                 {
                     emote.getContainer().getImage().Tint = activatedColor;
                     emote.getContainer().Enabled = true;
+                    if (emote.getFavContainer() != null)
+                    {
+                        emote.getFavContainer().getImage().Tint = activatedColor;
+                        emote.getFavContainer().Enabled = true;
+                    }
                     emote.isDeactivatedByLocked(false);
                 }
             }
         }
 
+
+        public void createEmoteContainer(List<Emote> emoteList, Panel panel, String category, bool fav)
+        {
+            foreach (Emote emote in emoteList)
+            {
+
+                var emoteContainer = new EmoteContainer()
+                {
+                    Size = new Point(size, size),
+                    BasicTooltipText = emote.getToolTipp()[language],
+                    Parent = panel
+                };
+
+                var emoteImage = new Image(ContentsManager.GetTexture(emote.getImagePath()))
+                {
+                    Size = new Point(size, size),
+                    BasicTooltipText = emote.getToolTipp()[language],
+                    ZIndex = 1,
+                    Parent = emoteContainer
+                };
+
+                var emoteLabel = new Label
+                {
+                    Text = emote.getToolTipp()[language],
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Size = new Point(size, labelSize),
+                    ZIndex = 2,
+                    Parent = emoteContainer,
+                    AutoSizeWidth = false,
+                    Visible = false,
+                    BackgroundColor = Color.Black,
+                    Location = new Point(0, size - 1)
+                };
+
+                if (emote.getCategory().Equals(EmoteLibrary.RANKCODE))
+                {
+                    var cooldownLabel = new Label
+                    {
+                        Text = "60",
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Size = new Point(size, size),
+                        ZIndex = 3,
+                        Font = GameService.Content.DefaultFont32,
+                        Parent = emoteContainer,
+                        AutoSizeWidth = false,
+                        Visible = false
+                    };
+
+                    emoteContainer.setCooldownLabel(cooldownLabel);
+                }
+
+                ////Add controls to container
+                emoteContainer.setImage(emoteImage);
+                emoteContainer.setLabel(emoteLabel);
+
+                //OnClick Listener
+                emoteClickEvent = delegate
+                {
+                    if (emoteAllowed())
+                    {
+                        //ScreenNotification.ShowNotification(emote.getToolTipp()[language]);
+                        //Activate Emote
+                        activateEmote(emote.getChatCode(), targetCheckbox.Checked, synchronCheckbox.Checked);
+                        if (emote.getCategory().Equals(EmoteLibrary.RANKCODE))
+                        {
+                            activateCooldown();
+                        }
+                    }
+                };
+                emoteContainer.Click += emoteClickEvent;
+                switch (category)
+                {
+                    case EmoteLibrary.CORECODE:
+                        coreEmoteContainers.Add(emoteContainer);
+                        break;
+                    case EmoteLibrary.UNLOCKCODE:
+                        unlockEmoteContainers.Add(emoteContainer);
+                        break;
+                    case EmoteLibrary.RANKCODE:
+                        cooldownEmoteContainers.Add(emoteContainer);
+                        break;
+
+                }
+
+                if (!fav)
+                {
+                    emote.setContainer(emoteContainer);
+                }
+                else
+                {
+                    emoteContainer.Visible = false;
+                    emote.setFavContainer(emoteContainer);
+                }
+
+            }
+        }
 
     }
 }

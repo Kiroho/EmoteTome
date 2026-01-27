@@ -18,9 +18,9 @@ namespace EmoteTome
         private static readonly String UNLOCKJSON = "Emotes/Unlock/Json/";
         private static readonly String RANKLIST = "Emotes/Rank/Json/emotelist.txt";
         private static readonly String RANKJSON = "Emotes/Rank/Json/";
-        public static readonly String CORECODE = "core";
-        public static readonly String UNLOCKCODE = "unlock";
-        public static readonly String RANKCODE = "rank";
+        public const String CORECODE = "core";
+        public const String UNLOCKCODE = "unlock";
+        public const String RANKCODE = "rank";
         public EmoteLibrary(ContentsManager manager)
         {
             this.contentsManager = manager;

@@ -17,7 +17,7 @@ namespace EmoteTome
             };
         public static readonly List<String> UNLOCKABLEPANELTITLE = new List<String> {
             "Unlockable Emotes",
-            "Emotes pour déverrouiller",
+            "Emotes pour deverrouiller",
             "Freischaltbare Emotes",
             "Emotes desbloqueables"
             };
@@ -29,7 +29,7 @@ namespace EmoteTome
             };
         public static readonly List<String> COREPANELTITLE = new List<String> {
             "Core Emotes",
-            "Émote de base",
+            "Emote de base",
             "Kern Emotes",
             "Emotes de base"
             };
@@ -126,6 +126,27 @@ namespace EmoteTome
             "Muestra/Oculta este emote"
             };
 
+        public static readonly List<String> HIDECOREEMOTE = new List<String> {
+            "Hide Core Category",
+            "Masque categorie de base",
+            "Verstecke Kern Kategorie",
+            "Oculta categoria de base"
+            };
+
+        public static readonly List<String> HIDEUNLOCKEMOTE = new List<String> {
+            "Hide Unlockable Category",
+            "Masque categorie deverrouiller",
+            "Verstecke Freischaltbar Kategorie",
+            "Oculta categoria desbloqueables"
+            };
+
+        public static readonly List<String> HIDERANKEMOTE = new List<String> {
+            "Hide Rank Category",
+            "Masque categorie rang",
+            "Verstecke Rang Kategorie",
+            "Oculta categoria rango"
+            };
+
         public static readonly List<String> CHECKKEY = new List<String> {
             "Check keystrokes for emotes",
             "vérifier les touches enfoncées pour les émotes",
@@ -150,6 +171,12 @@ namespace EmoteTome
             "N'autorise pas les émoticônes lorsque le joueur se déplace.\nIl n'est pas recommandé de désactiver ce paramètre.",
             "Erlaubt keine Emotes, während sich der Spieler bewegt.\nEs wird nicht empfohlen, diese Einstellung zu deaktivieren.",
             "No permite gestos cuando el jugador está en movimiento.\nNo se recomienda deshabilitar esta configuración.",
+            };
+        public static readonly List<String> FAVORITESBAR = new List<String> {
+            "Favorites Bar",
+            "Bar des favoris",
+            "Favoriten Leiste",
+            "Barra de favoritos",
             };
 
         #region Core Emotes

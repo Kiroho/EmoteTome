@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace EmoteTome
 {
-    class Emote
+    public class Emote
     {
         private String imagePath;
         private List<String> toolTipp;
@@ -12,6 +12,7 @@ namespace EmoteTome
         private bool canTarget;
         //private Image img = new Image();
         private EmoteContainer emoCon = new EmoteContainer();
+        private EmoteContainer favCon;
         private String category;
         private bool deactivatedByTargeting = false;
         private bool deactivatedByLocked = false;
@@ -63,6 +64,15 @@ namespace EmoteTome
         public EmoteContainer getContainer()
         {
             return emoCon;
+        }
+        public void setFavContainer(EmoteContainer container)
+        {
+            favCon = new EmoteContainer();
+            favCon = container;
+        }
+        public EmoteContainer getFavContainer()
+        {
+            return favCon;
         }
 
 
