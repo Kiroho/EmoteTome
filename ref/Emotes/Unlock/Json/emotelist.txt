@@ -34,3 +34,8 @@ crabdance
 shocked
 thumbsup
 thumbsdown
+poseheart
+posepeace
+posesassy
+poseshy
+happydance

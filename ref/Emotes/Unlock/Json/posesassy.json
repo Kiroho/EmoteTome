@@ -1,0 +1,12 @@
+{
+    "imagePath": "Emotes/Unlock/Icons/PoseSassy.png",
+    "toolTipp": [
+        "Pose Sassy",
+        "Pose Sassy",
+        "Freche Pose",
+        "Pose Sassy"
+    ],
+    "chatCode": "posesassy",
+    "canTarget": true,
+    "category": "unlock"
+}

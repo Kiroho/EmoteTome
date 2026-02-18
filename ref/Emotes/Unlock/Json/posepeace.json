@@ -1,0 +1,12 @@
+{
+    "imagePath": "Emotes/Unlock/Icons/PosePeace.png",
+    "toolTipp": [
+        "Pose Peace",
+        "Pose Peace",
+        "Frieden Pose",
+        "Pose Peace"
+    ],
+    "chatCode": "posepeace",
+    "canTarget": true,
+    "category": "unlock"
+}

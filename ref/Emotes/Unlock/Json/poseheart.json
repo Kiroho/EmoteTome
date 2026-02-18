@@ -1,0 +1,12 @@
+{
+    "imagePath": "Emotes/Unlock/Icons/PoseHeart.png",
+    "toolTipp": [
+        "Pose Heart",
+        "Pose Heart",
+        "Herz Pose",
+        "Pose Heart"
+    ],
+    "chatCode": "poseheart",
+    "canTarget": true,
+    "category": "unlock"
+}

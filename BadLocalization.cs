@@ -545,6 +545,36 @@ namespace EmoteTome
             "Daumenrunter",
             "Nomegusta"
             };
+        public static readonly List<String> POSEHEART = new List<String> {
+            "PoseHeart",
+            "PoseHeart",
+            "Herzpose",
+            "PoseHeart"
+            };
+        public static readonly List<String> POSEPEACE = new List<String> {
+            "PosePeace",
+            "PosePeace",
+            "Friedenpose",
+            "PosePeace"
+            };
+        public static readonly List<String> POSESASSY = new List<String> {
+            "PoseSassy",
+            "PoseSassy",
+            "FrechePose",
+            "PoseSassy"
+            };
+        public static readonly List<String> POSESHY = new List<String> {
+            "PoseShy",
+            "PoseShy",
+            "VerlegenePose",
+            "PoseShy"
+            };
+        public static readonly List<String> HAPPYDANCE = new List<String> {
+            "HappyDance",
+            "HappyDance",
+            "Freudentanz",
+            "HappyDance"
+            };
 
         #endregion
 

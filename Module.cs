@@ -120,6 +120,11 @@ namespace EmoteTome
         private SettingEntry<bool> _showShocked;
         private SettingEntry<bool> _showThumbsUp;
         private SettingEntry<bool> _showThumbsDown;
+        private SettingEntry<bool> _showPoseHeart;
+        private SettingEntry<bool> _showPosePeace;
+        private SettingEntry<bool> _showPoseSassy;
+        private SettingEntry<bool> _showPoseShy;
+        private SettingEntry<bool> _showHappyDance;
         private List<Tuple<SettingEntry<bool>, Emote>> unlockEmoteSettingMap = new List<Tuple<SettingEntry<bool>, Emote>>();
 
         //bools for rank emotes
@@ -538,7 +543,32 @@ namespace EmoteTome
             _showThumbsDown = settings.DefineSetting(
                 "Show ThumbsDown",
                 true,
-                () => BadLocalization.THUMBSDOWN[language],
+                () => BadLocalization.POSEHEART[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showPoseHeart = settings.DefineSetting(
+                "Show PoseHeart",
+                true,
+                () => BadLocalization.POSEHEART[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showPosePeace = settings.DefineSetting(
+                "Show PosePeace",
+                true,
+                () => BadLocalization.POSEPEACE[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showPoseSassy = settings.DefineSetting(
+                "Show PoseSassy",
+                true,
+                () => BadLocalization.POSESASSY[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showPoseShy = settings.DefineSetting(
+                "Show PoseShy",
+                true,
+                () => BadLocalization.POSESHY[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showHappyDance = settings.DefineSetting(
+                "Show HappyDance",
+                true,
+                () => BadLocalization.HAPPYDANCE[language],
                 () => BadLocalization.EMOTETEXT[language]);
 
             #endregion
@@ -940,6 +970,11 @@ namespace EmoteTome
             unlockSettingList.Add(_showShocked);
             unlockSettingList.Add(_showThumbsUp);
             unlockSettingList.Add(_showThumbsDown);
+            unlockSettingList.Add(_showPoseHeart);
+            unlockSettingList.Add(_showPosePeace);
+            unlockSettingList.Add(_showPoseSassy);
+            unlockSettingList.Add(_showPoseShy);
+            unlockSettingList.Add(_showHappyDance);
 
             try
             {
@@ -1785,7 +1820,12 @@ namespace EmoteTome
                             emote.getChatCode().Equals("crabdance")||
                             emote.getChatCode().Equals("shocked")||
                             emote.getChatCode().Equals("thumbsup") ||
-                            emote.getChatCode().Equals("thumbsdown"))
+                            emote.getChatCode().Equals("thumbsdown") ||
+                            emote.getChatCode().Equals("poseheart") ||
+                            emote.getChatCode().Equals("posepeace") ||
+                            emote.getChatCode().Equals("posesassy") ||
+                            emote.getChatCode().Equals("poseshy") ||
+                            emote.getChatCode().Equals("happydance"))
                         {
                             emote.getContainer().Enabled = true;
                             emote.getContainer().getImage().Tint = activatedColor;

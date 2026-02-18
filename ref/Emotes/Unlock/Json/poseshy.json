@@ -1,0 +1,12 @@
+{
+    "imagePath": "Emotes/Unlock/Icons/PoseShy.png",
+    "toolTipp": [
+        "Pose Shy",
+        "Pose Shy",
+        "Verlegene Pose",
+        "Pose Shy"
+    ],
+    "chatCode": "poseshy",
+    "canTarget": true,
+    "category": "unlock"
+}

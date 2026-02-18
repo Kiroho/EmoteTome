@@ -1,0 +1,12 @@
+{
+    "imagePath": "Emotes/Unlock/Icons/happydance.png",
+    "toolTipp": [
+        "Happy Dance",
+        "Happy Dance",
+        "Freudentanz",
+        "Happy Dance"
+    ],
+    "chatCode": "happydance",
+    "canTarget": true,
+    "category": "unlock"
+}
