@@ -543,7 +543,7 @@ namespace EmoteTome
             _showThumbsDown = settings.DefineSetting(
                 "Show ThumbsDown",
                 true,
-                () => BadLocalization.POSEHEART[language],
+                () => BadLocalization.THUMBSDOWN[language],
                 () => BadLocalization.EMOTETEXT[language]);
             _showPoseHeart = settings.DefineSetting(
                 "Show PoseHeart",
