@@ -999,6 +999,10 @@ namespace EmoteTome
             unlockSettingList.Add(_showPoseSassy);
             unlockSettingList.Add(_showPoseShy);
             unlockSettingList.Add(_showHappyDance);
+            unlockSettingList.Add(_showWhistle);
+            unlockSettingList.Add(_showMasterpiece);
+            unlockSettingList.Add(_showTransform);
+            unlockSettingList.Add(_showPopcorn);
 
             try
             {
