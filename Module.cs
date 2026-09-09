@@ -125,6 +125,10 @@ namespace EmoteTome
         private SettingEntry<bool> _showPoseSassy;
         private SettingEntry<bool> _showPoseShy;
         private SettingEntry<bool> _showHappyDance;
+        private SettingEntry<bool> _showWhistle;
+        private SettingEntry<bool> _showMasterpiece;
+        private SettingEntry<bool> _showTransform;
+        private SettingEntry<bool> _showPopcorn;
         private List<Tuple<SettingEntry<bool>, Emote>> unlockEmoteSettingMap = new List<Tuple<SettingEntry<bool>, Emote>>();
 
         //bools for rank emotes
@@ -569,6 +573,26 @@ namespace EmoteTome
                 "Show HappyDance",
                 true,
                 () => BadLocalization.HAPPYDANCE[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showWhistle = settings.DefineSetting(
+                "Show Whistle",
+                true,
+                () => BadLocalization.WHISTLE[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showMasterpiece = settings.DefineSetting(
+                "Show Masterpiece",
+                true,
+                () => BadLocalization.MASTERPIECE[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showTransform = settings.DefineSetting(
+                "Show Transform",
+                true,
+                () => BadLocalization.TRANSFORM[language],
+                () => BadLocalization.EMOTETEXT[language]);
+            _showPopcorn = settings.DefineSetting(
+                "Show Popcorn",
+                true,
+                () => BadLocalization.POPCORN[language],
                 () => BadLocalization.EMOTETEXT[language]);
 
             #endregion
@@ -1825,7 +1849,11 @@ namespace EmoteTome
                             emote.getChatCode().Equals("posepeace") ||
                             emote.getChatCode().Equals("posesassy") ||
                             emote.getChatCode().Equals("poseshy") ||
-                            emote.getChatCode().Equals("happydance"))
+                            emote.getChatCode().Equals("happydance") ||
+                            emote.getChatCode().Equals("whistle") ||
+                            emote.getChatCode().Equals("masterpiece") ||
+                            emote.getChatCode().Equals("transform") ||
+                            emote.getChatCode().Equals("popcorn"))
                         {
                             emote.getContainer().Enabled = true;
                             emote.getContainer().getImage().Tint = activatedColor;

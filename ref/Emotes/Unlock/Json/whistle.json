@@ -1,0 +1,12 @@
+{
+	"imagePath": "Emotes/Unlock/Icons/whistle.png",
+	"toolTipp": [
+		"Whistle",
+		"Siffler",
+		"Pfeifen",
+		"Silbido"
+	],
+	"chatCode": "whistle",
+	"canTarget": false,
+	"category": "unlock"
+}

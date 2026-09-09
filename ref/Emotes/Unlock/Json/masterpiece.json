@@ -1,0 +1,12 @@
+{
+	"imagePath": "Emotes/Unlock/Icons/masterpiece.png",
+	"toolTipp": [
+		"Masterpiece",
+		"Chefdoeuvre",
+		"Meisterwerk",
+		"Unaobramaestra"
+	],
+	"chatCode": "masterpiece",
+	"canTarget": true,
+	"category": "unlock"
+}

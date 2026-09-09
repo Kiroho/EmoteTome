@@ -1,0 +1,12 @@
+{
+	"imagePath": "Emotes/Unlock/Icons/transform.png",
+	"toolTipp": [
+		"Transform",
+		"Transformemoi",
+		"Verwandeln",
+		"Transformacion"
+	],
+	"chatCode": "transform",
+	"canTarget": true,
+	"category": "unlock"
+}

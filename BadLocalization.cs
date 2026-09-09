@@ -575,6 +575,30 @@ namespace EmoteTome
             "Freudentanz",
             "HappyDance"
             };
+        public static readonly List<String> WHISTLE = new List<String> {
+            "Whistle",
+            "Siffler",
+            "Pfeifen",
+            "Silbido"
+            };
+        public static readonly List<String> MASTERPIECE = new List<String> {
+            "Masterpiece",
+            "Chefdoeuvre",
+            "Meisterwerk",
+            "Unaobramaestra"
+            };
+        public static readonly List<String> TRANSFORM = new List<String> {
+            "Transform",
+            "Transformemoi",
+            "Verwandeln",
+            "Transformacion"
+            };
+        public static readonly List<String> POPCORN = new List<String> {
+            "Popcorn",
+            "Popcorn",
+            "Popcorn",
+            "Popcorn"
+            };
 
         #endregion
 

@@ -1,0 +1,12 @@
+{
+	"imagePath": "Emotes/Unlock/Icons/popcorn.png",
+	"toolTipp": [
+		"Popcorn",
+		"Popcorn",
+		"Popcorn",
+		"Popcorn"
+	],
+	"chatCode": "popcorn",
+	"canTarget": true,
+	"category": "unlock"
+}
